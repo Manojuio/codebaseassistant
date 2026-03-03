@@ -36,4 +36,4 @@ def ingest_code(repo_path: str):
     print(f"Total chunks: {len(chunks)}")
     print(f"Total documents: {len(documents)}")
 
-    return build_vectorstore(documents, repo_name)
+    return documents
