@@ -65,42 +65,37 @@ def _read_meta(store_path: Path):
 # ===============================
 
 def build_vectorstore(documents, store_type: str, name: str, force: bool = False):
-    """
-    store_type: 'repo' or 'pdf'
-    name: repo_name or pdf_name
-    """
-
     embeddings = get_embeddings()
-    store_path = _store_path(store_type, name)
+    store_path = BASE_VECTOR_DIR / store_type / name
 
-    # If exists and not forcing rebuild
-    if (store_path / "index.faiss").exists() and not force:
-        meta = _read_meta(store_path)
+    # If store exists
+    if store_path.exists():
 
-        if meta and meta.get("embedding_model") == EMBED_MODEL:
+        # If not forcing rebuild → just load
+        if not force and (store_path / "index.faiss").exists():
             return FAISS.load_local(
                 str(store_path),
                 embeddings,
                 allow_dangerous_deserialization=True,
             )
-        else:
-            shutil.rmtree(store_path)
 
-    # Fresh build
-    if store_path.exists():
-        shutil.rmtree(store_path)
+        # If forcing rebuild → try delete safely
+        if force:
+            try:
+                shutil.rmtree(store_path)
+            except PermissionError:
+                raise RuntimeError(
+                    "Vectorstore is currently in use. Restart server before rebuilding."
+                )
 
+    # Create fresh store
     store_path.mkdir(parents=True, exist_ok=True)
 
-    print("3.starting the vectorestore build...")
     vectorstore = FAISS.from_documents(documents, embeddings)
-    print("4.vectorstore build done, saving to disk...")
-
     vectorstore.save_local(str(store_path))
     _write_meta(store_path, len(documents))
 
     return vectorstore
-
 
 def load_vectorstore(store_type: str, name: str):
     embeddings = get_embeddings()

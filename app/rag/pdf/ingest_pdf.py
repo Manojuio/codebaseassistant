@@ -42,5 +42,5 @@ def ingest_pdf(path: str):
                 },
             )
         )
-
+    print("Total chunks created:", len(chunks))
     return documents

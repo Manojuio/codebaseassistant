@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+.env
+.python-version
+cloned_repos/
+vectorstores/
+temp.pdf

@@ -17,5 +17,5 @@ def extract_pdf_text(path: str) -> str:
             extracted = page.extract_text()
             if extracted:
                 text += extracted + "\n\n"
-
+    print("Raw text extracted from PDF. Length:", len(text))
     return text
